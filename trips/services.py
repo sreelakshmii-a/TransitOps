@@ -26,7 +26,7 @@ def _release_trip(trip_id: str, new_status: str) -> dict:
         update_fields = {"status": new_status}
         if new_status == TripStatus.COMPLETED:
             update_fields["completed_at"] = timezone.now()
-        Trip.objects.filter(id=trip_id).update(**update_fields)
+        Trip.objects.filter(id=trip_id, status=TripStatus.DISPATCHED).update(**update_fields)
 
         Vehicle.objects.filter(
             id=trip.vehicle_id, status=VehicleStatus.ON_TRIP

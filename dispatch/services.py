@@ -1,3 +1,6 @@
+import os
+import time
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -13,6 +16,19 @@ class ConflictError(Exception):
         super().__init__(reason)
 
 
+def _debug_delay():
+    """
+    Demo-only forcing mechanism (council fix): widens the race window between
+    acquiring the row locks and committing, so two near-simultaneous requests
+    genuinely overlap instead of resolving sequentially at the HTTP level.
+    Off unless DISPATCH_DEBUG_DELAY_MS is explicitly set — never set in tests
+    or normal operation.
+    """
+    delay_ms = os.environ.get("DISPATCH_DEBUG_DELAY_MS")
+    if delay_ms:
+        time.sleep(int(delay_ms) / 1000)
+
+
 def dispatch_trip(trip_id: str) -> dict:
     """Returns {"success": True} or raises ConflictError(reason)."""
     with transaction.atomic():
@@ -20,6 +36,10 @@ def dispatch_trip(trip_id: str) -> dict:
         vehicle = Vehicle.objects.select_for_update().get(id=trip.vehicle_id)
         driver = Driver.objects.select_for_update().get(id=trip.driver_id)
 
+        _debug_delay()
+
+        if trip.status != TripStatus.DRAFT:
+            raise ConflictError("trip_not_draft")
         if vehicle.status != VehicleStatus.AVAILABLE:
             raise ConflictError("vehicle_unavailable")
         if driver.status != DriverStatus.AVAILABLE:
