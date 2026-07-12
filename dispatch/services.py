@@ -2,6 +2,7 @@ import os
 import time
 
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from drivers.models import Driver, DriverStatus
@@ -32,7 +33,7 @@ def _debug_delay():
 def dispatch_trip(trip_id: str) -> dict:
     """Returns {"success": True} or raises ConflictError(reason)."""
     with transaction.atomic():
-        trip = Trip.objects.select_related("vehicle", "driver").get(id=trip_id)
+        trip = get_object_or_404(Trip.objects.select_related("vehicle", "driver"), id=trip_id)
         vehicle = Vehicle.objects.select_for_update().get(id=trip.vehicle_id)
         driver = Driver.objects.select_for_update().get(id=trip.driver_id)
 

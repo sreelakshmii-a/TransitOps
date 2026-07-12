@@ -150,3 +150,8 @@ class TripLifecycleTest(TestCase):
         response = self.client.post(f"/api/dispatch/{trip.id}/")
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.data["reason"], "vehicle_unavailable")
+
+    def test_actions_on_nonexistent_trip_return_404_not_500(self):
+        self.assertEqual(self.client.post("/api/dispatch/99999/").status_code, 404)
+        self.assertEqual(self.client.post("/api/trips/99999/complete/").status_code, 404)
+        self.assertEqual(self.client.post("/api/trips/99999/cancel/").status_code, 404)
