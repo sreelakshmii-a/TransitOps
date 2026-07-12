@@ -64,6 +64,22 @@
     }
   },
   {
+    "model": "vehicles.vehicle",
+    "pk": 5,
+    "fields": {
+      "registration_number": "SEED-DEMO-1",
+      "model": "Force Traveller",
+      "type": "VAN",
+      "capacity": 1000,
+      "odometer": 5000,
+      "acquisition_cost": "900000.00",
+      "status": "AVAILABLE",
+      "region": "North",
+      "created_at": "2026-07-01T00:00:00Z",
+      "updated_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
     "model": "drivers.driver",
     "pk": 1,
     "fields": {
@@ -99,6 +115,19 @@
       "contact": "9000000003",
       "safety_score": 100,
       "status": "OFF_DUTY",
+      "created_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "drivers.driver",
+    "pk": 4,
+    "fields": {
+      "name": "Seed Driver Demo",
+      "license": "DL-SEED-004",
+      "license_expiry": "2027-01-01",
+      "contact": "9000000004",
+      "safety_score": 100,
+      "status": "AVAILABLE",
       "created_at": "2026-07-01T00:00:00Z"
     }
   },
@@ -160,6 +189,36 @@
       "dispatched_at": "2026-07-10T09:00:00Z",
       "completed_at": null,
       "created_at": "2026-07-10T08:00:00Z"
+    }
+  },
+  {
+    "model": "trips.trip",
+    "pk": 5,
+    "fields": {
+      "vehicle": 5,
+      "driver": 4,
+      "cargo_weight": 300,
+      "origin": "Warehouse A",
+      "destination": "Depot B",
+      "status": "DRAFT",
+      "dispatched_at": null,
+      "completed_at": null,
+      "created_at": "2026-07-12T00:00:00Z"
+    }
+  },
+  {
+    "model": "trips.trip",
+    "pk": 6,
+    "fields": {
+      "vehicle": 5,
+      "driver": 4,
+      "cargo_weight": 300,
+      "origin": "Warehouse A",
+      "destination": "Depot B",
+      "status": "DRAFT",
+      "dispatched_at": null,
+      "completed_at": null,
+      "created_at": "2026-07-12T00:00:01Z"
     }
   }
 ]
