@@ -155,3 +155,92 @@ class TripLifecycleTest(TestCase):
         self.assertEqual(self.client.post("/api/dispatch/99999/").status_code, 404)
         self.assertEqual(self.client.post("/api/trips/99999/complete/").status_code, 404)
         self.assertEqual(self.client.post("/api/trips/99999/cancel/").status_code, 404)
+
+    def test_create_missing_vehicle_rejected(self):
+        response = self.client.post("/api/trips/", {
+            "driver": self.driver.id, "cargo_weight": 100, "origin": "A", "destination": "B",
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_missing_driver_rejected(self):
+        response = self.client.post("/api/trips/", {
+            "vehicle": self.vehicle.id, "cargo_weight": 100, "origin": "A", "destination": "B",
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_nonexistent_vehicle_rejected(self):
+        response = self.client.post("/api/trips/", {
+            "vehicle": 99999, "driver": self.driver.id,
+            "cargo_weight": 100, "origin": "A", "destination": "B",
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_cargo_weight_exactly_at_capacity_allowed(self):
+        response = self._create_draft(cargo_weight=self.vehicle.capacity)
+        self.assertEqual(response.status_code, 201)
+
+    def test_dispatch_rejects_vehicle_in_shop(self):
+        self.vehicle.status = VehicleStatus.IN_SHOP
+        self.vehicle.save(update_fields=["status"])
+        trip = Trip.objects.create(
+            vehicle=self.vehicle, driver=self.driver, cargo_weight=100,
+            origin="A", destination="B", status=TripStatus.DRAFT,
+        )
+        response = self.client.post(f"/api/dispatch/{trip.id}/")
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.data["reason"], "vehicle_unavailable")
+
+    def test_dispatch_rejects_suspended_driver(self):
+        self.driver.status = DriverStatus.SUSPENDED
+        self.driver.save(update_fields=["status"])
+        trip = Trip.objects.create(
+            vehicle=self.vehicle, driver=self.driver, cargo_weight=100,
+            origin="A", destination="B", status=TripStatus.DRAFT,
+        )
+        response = self.client.post(f"/api/dispatch/{trip.id}/")
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.data["reason"], "driver_unavailable")
+
+    def test_dispatch_rejects_cargo_over_capacity(self):
+        # DRAFT trips created directly (bypassing the serializer's create-time
+        # check) must still be re-validated at dispatch time.
+        trip = Trip.objects.create(
+            vehicle=self.vehicle, driver=self.driver, cargo_weight=self.vehicle.capacity + 1,
+            origin="A", destination="B", status=TripStatus.DRAFT,
+        )
+        response = self.client.post(f"/api/dispatch/{trip.id}/")
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.data["reason"], "cargo_exceeds_capacity")
+
+    def test_full_lifecycle_draft_to_dispatch_to_complete(self):
+        create = self._create_draft(cargo_weight=100)
+        trip_id = create.data["id"]
+
+        dispatch = self.client.post(f"/api/dispatch/{trip_id}/")
+        self.assertEqual(dispatch.status_code, 200)
+        self.vehicle.refresh_from_db()
+        self.driver.refresh_from_db()
+        self.assertEqual(self.vehicle.status, VehicleStatus.ON_TRIP)
+        self.assertEqual(self.driver.status, DriverStatus.ON_TRIP)
+
+        complete = self.client.post(f"/api/trips/{trip_id}/complete/")
+        self.assertEqual(complete.status_code, 200)
+        self.vehicle.refresh_from_db()
+        self.driver.refresh_from_db()
+        self.assertEqual(self.vehicle.status, VehicleStatus.AVAILABLE)
+        self.assertEqual(self.driver.status, DriverStatus.AVAILABLE)
+
+    def test_any_authenticated_role_can_create_and_dispatch_trip(self):
+        # Documents current behavior: TripViewSet/dispatch have no HasRole
+        # restriction (unlike Vehicles/Drivers/Maintenance/Fuel), so any
+        # authenticated user -- e.g. a SAFETY_OFFICER, who has no PRD-listed
+        # trip responsibility -- can create and dispatch trips. Flagged as an
+        # RBAC gap worth a product decision rather than assumed intentional.
+        safety_officer = get_user_model().objects.create_user(
+            username="so", email="so@example.com", password="x", role="SAFETY_OFFICER"
+        )
+        self.client.force_authenticate(user=safety_officer)
+        create = self._create_draft(cargo_weight=100)
+        self.assertEqual(create.status_code, 201)
+        dispatch = self.client.post(f"/api/dispatch/{create.data['id']}/")
+        self.assertEqual(dispatch.status_code, 200)

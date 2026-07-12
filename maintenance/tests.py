@@ -19,7 +19,44 @@ def make_user(role, username="user"):
 class MaintenanceAPITests(APITestCase):
     def setUp(self):
         self.fleet_manager = make_user("FLEET_MANAGER", "fm")
+        self.safety_officer = make_user("SAFETY_OFFICER", "so")
+        self.financial_analyst = make_user("FINANCIAL_ANALYST", "fa")
+        self.driver_role = make_user("DRIVER", "drv")
         self.client.force_authenticate(user=self.fleet_manager)
+
+    def test_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get("/api/maintenance/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_safety_officer_can_read_but_not_open(self):
+        vehicle = Vehicle.objects.create(registration_number="RO1", capacity=100)
+        self.client.force_authenticate(user=self.safety_officer)
+
+        list_response = self.client.get("/api/maintenance/")
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+
+        create_response = self.client.post(
+            "/api/maintenance/", {"vehicle": vehicle.id, "reason": "Blocked", "cost": "1.00"}
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_financial_analyst_forbidden(self):
+        self.client.force_authenticate(user=self.financial_analyst)
+        response = self.client.get("/api/maintenance/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_driver_role_forbidden(self):
+        self.client.force_authenticate(user=self.driver_role)
+        response = self.client.get("/api/maintenance/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_safety_officer_cannot_close(self):
+        vehicle = Vehicle.objects.create(registration_number="RO2", capacity=100, status=VehicleStatus.IN_SHOP)
+        log = MaintenanceLog.objects.create(vehicle=vehicle, reason="Tires", cost="10.00")
+        self.client.force_authenticate(user=self.safety_officer)
+        response = self.client.post(f"/api/maintenance/{log.id}/close/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_open_maintenance_puts_vehicle_in_shop(self):
         vehicle = Vehicle.objects.create(

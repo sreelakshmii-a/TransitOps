@@ -56,3 +56,45 @@ class FuelExpensesAPITests(APITestCase):
         response = self.client.get("/api/expenses/?category=TOLL")
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["category"], ExpenseCategory.TOLL)
+
+    def test_requires_authentication(self):
+        response = self.client.get("/api/fuel-logs/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_financial_analyst_cannot_create_expense(self):
+        self.client.force_authenticate(user=self.financial_analyst)
+        response = self.client.post(
+            "/api/expenses/", {"vehicle": self.vehicle.id, "category": ExpenseCategory.TOLL, "amount": "5.00"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_fleet_manager_can_create_expense(self):
+        self.client.force_authenticate(user=self.fleet_manager)
+        response = self.client.post(
+            "/api/expenses/", {"vehicle": self.vehicle.id, "category": ExpenseCategory.OPERATIONAL, "amount": "22.50"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_expense_allows_null_vehicle_and_trip(self):
+        self.client.force_authenticate(user=self.fleet_manager)
+        response = self.client.post(
+            "/api/expenses/", {"category": ExpenseCategory.TOLL, "amount": "8.00"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNone(response.data["vehicle"])
+
+    def test_fuel_log_missing_required_field_rejected(self):
+        self.client.force_authenticate(user=self.fleet_manager)
+        response = self.client.post(
+            "/api/fuel-logs/", {"vehicle": self.vehicle.id, "cost": "10.00", "odometer_at_fill": 1}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_expense_filter_by_vehicle(self):
+        other_vehicle = Vehicle.objects.create(registration_number="V2", capacity=100)
+        Expense.objects.create(vehicle=self.vehicle, category=ExpenseCategory.FUEL, amount=10)
+        Expense.objects.create(vehicle=other_vehicle, category=ExpenseCategory.FUEL, amount=20)
+        self.client.force_authenticate(user=self.fleet_manager)
+        response = self.client.get(f"/api/expenses/?vehicle={self.vehicle.id}")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["amount"], "10.00")

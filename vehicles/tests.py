@@ -18,6 +18,8 @@ class VehicleAPITests(APITestCase):
     def setUp(self):
         self.fleet_manager = make_user("FLEET_MANAGER", "fm")
         self.driver = make_user("DRIVER", "drv")
+        self.safety_officer = make_user("SAFETY_OFFICER", "so")
+        self.financial_analyst = make_user("FINANCIAL_ANALYST", "fa")
 
     def auth_as(self, user):
         self.client.force_authenticate(user=user)
@@ -30,6 +32,21 @@ class VehicleAPITests(APITestCase):
         self.auth_as(self.driver)
         response = self.client.get("/api/vehicles/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_safety_officer_forbidden(self):
+        self.auth_as(self.safety_officer)
+        response = self.client.get("/api/vehicles/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_financial_analyst_forbidden(self):
+        self.auth_as(self.financial_analyst)
+        response = self.client.get("/api/vehicles/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_missing_required_fields_rejected(self):
+        self.auth_as(self.fleet_manager)
+        response = self.client.post("/api/vehicles/", {"model": "No Reg Number"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_and_duplicate_registration(self):
         self.auth_as(self.fleet_manager)
