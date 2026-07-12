@@ -9,6 +9,9 @@ from drivers.models import Driver, DriverStatus
 from trips.models import Trip
 from vehicles.models import Vehicle, VehicleStatus
 
+from trips.models import TripStatus
+from trips.services import cancel_trip, complete_trip
+
 from .services import ConflictError, dispatch_trip
 
 
@@ -67,3 +70,50 @@ class DispatchConcurrencyTest(TransactionTestCase):
         self.driver.refresh_from_db()
         self.assertEqual(self.vehicle.status, VehicleStatus.ON_TRIP)
         self.assertEqual(self.driver.status, DriverStatus.ON_TRIP)
+
+
+class CompleteCancelConcurrencyTest(TransactionTestCase):
+    """Concurrent complete+cancel on the same DISPATCHED trip must not both
+    succeed — the trip-row select_for_update() in trips/services.py should
+    serialize these exactly like dispatch_trip does for vehicle/driver."""
+
+    def setUp(self):
+        self.vehicle = Vehicle.objects.create(
+            registration_number="CONC-2", capacity=1000, status=VehicleStatus.ON_TRIP,
+        )
+        self.driver = Driver.objects.create(
+            name="Concurrency Driver 2",
+            license_expiry=timezone.now().date() + datetime.timedelta(days=365),
+            status=DriverStatus.ON_TRIP,
+        )
+        self.trip = Trip.objects.create(
+            vehicle=self.vehicle, driver=self.driver, cargo_weight=100,
+            origin="A", destination="B", status=TripStatus.DISPATCHED,
+        )
+
+    def test_concurrent_complete_and_cancel_only_one_succeeds(self):
+        results = {}
+
+        def run(fn, key):
+            try:
+                results[key] = ("success", fn(self.trip.id))
+            except ConflictError as exc:
+                results[key] = ("conflict", exc.reason)
+            finally:
+                connections.close_all()
+
+        t1 = threading.Thread(target=run, args=(complete_trip, "complete"))
+        t2 = threading.Thread(target=run, args=(cancel_trip, "cancel"))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+
+        outcomes = [results["complete"][0], results["cancel"][0]]
+        self.assertEqual(outcomes.count("success"), 1)
+        self.assertEqual(outcomes.count("conflict"), 1)
+
+        self.vehicle.refresh_from_db()
+        self.driver.refresh_from_db()
+        self.assertEqual(self.vehicle.status, VehicleStatus.AVAILABLE)
+        self.assertEqual(self.driver.status, DriverStatus.AVAILABLE)
