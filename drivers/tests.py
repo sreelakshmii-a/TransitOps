@@ -93,3 +93,18 @@ class DriverAPITests(APITestCase):
         self.auth_as(self.fleet_manager)
         response = self.client.delete(f"/api/drivers/{driver.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_with_linked_trip_returns_409_not_500(self):
+        # Regression test: Trip.driver is on_delete=PROTECT, same crash risk
+        # as the vehicles side.
+        from trips.models import Trip
+        from vehicles.models import Vehicle
+
+        driver = Driver.objects.create(name="Y", license_expiry="2030-01-01")
+        vehicle = Vehicle.objects.create(registration_number="D2", capacity=100)
+        Trip.objects.create(vehicle=vehicle, driver=driver, cargo_weight=1, origin="A", destination="B")
+
+        self.auth_as(self.fleet_manager)
+        response = self.client.delete(f"/api/drivers/{driver.id}/")
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(response.data["reason"], "driver_has_trips")

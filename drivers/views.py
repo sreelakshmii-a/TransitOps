@@ -1,3 +1,4 @@
+from django.db.models import ProtectedError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -34,4 +35,11 @@ class DriverViewSet(viewsets.ModelViewSet):
                 {"reason": "driver_on_trip", "code": "cannot_delete_driver_on_trip"},
                 status=status.HTTP_409_CONFLICT,
             )
-        return super().destroy(request, *args, **kwargs)
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            # Trip.driver is on_delete=PROTECT — same crash risk as vehicles.
+            return Response(
+                {"reason": "driver_has_trips", "code": "cannot_delete_driver_with_trips"},
+                status=status.HTTP_409_CONFLICT,
+            )
