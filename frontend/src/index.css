@@ -1,36 +1,137 @@
-:root {
-  --text: #4b5563;
-  --text-h: #0f172a;
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --border: #e2e8f0;
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --danger: #dc2626;
-  --danger-bg: #fef2f2;
+/* Dark is the default (matches :root so there's never an undefined-variable flash
+   before ThemeProvider's layout effect sets data-theme). [data-theme="light"] below
+   overrides every token with its light-surface equivalent — both sets pulled from
+   the dataviz skill's validated palette.md chart-chrome/ink table, not invented. */
+:root,
+:root[data-theme="dark"] {
+  --bg: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #222221;
+  --text-h: #ffffff;
+  --text: #c3c2b7;
+  --text-muted: #898781;
+  --border: rgba(255, 255, 255, 0.1);
+  --gridline: #2c2c2a;
+  --baseline: #383835;
 
+  /* Fixed semantic blue — vehicle/driver/trip "On Trip"/"Dispatched" status color,
+     plus a few decorative dashboard accents. Never role-reactive: status meaning
+     must stay identical no matter who's logged in. */
+  --accent: #3987e5;
+  --accent-hover: #5598e7;
+  --accent-wash: rgba(57, 135, 229, 0.15);
+
+  /* Role accent — the single source of truth for role-based theming. --role-accent
+     is the raw per-role hex, used only for solid fills (buttons, avatar) where dark
+     ink text sits on top. --role-accent-text is a contrast-safe variant of the same
+     color for use AS text/icon color directly on the page surface (active nav,
+     role badge, links, focus rings) — several raw role hexes fail WCAG there,
+     badly so for the Driver green. Both set reactively by AuthContext on
+     [user, theme]; the values here are only the pre-login fallback. */
+  --role-accent: #3987e5;
+  --role-accent-text: #3987e5;
+  --role-accent-ink: #0b0b0b;
+
+  --good: #0ca30c;
+  --good-wash: rgba(12, 163, 12, 0.15);
+  --warning: #fab219;
+  --warning-wash: rgba(250, 178, 25, 0.15);
+  --critical: #d03b3b;
+  --critical-wash: rgba(208, 59, 59, 0.16);
+  --aqua: #199e70;
+  --aqua-wash: rgba(25, 158, 112, 0.15);
+  --violet: #9085e9;
+  --violet-wash: rgba(144, 133, 233, 0.16);
+
+  --danger: var(--critical);
+  --danger-bg: var(--critical-wash);
+
+  /* Validated dark-surface categorical hues for the Fleet Status bar chart (see
+     IMPLEMENTATION.md — these passed validate_palette.js as a set; the raw
+     --good/--warning/--critical above are validated for text/badge contrast only,
+     not as chart fills). Chart marks, not role/status UI — CSS vars purely so the
+     chart re-themes with data-theme without a JS light/dark branch. */
+  --chart-cat-green: #008300;
+  --chart-cat-blue: #3987e5;
+  --chart-cat-amber: #c98500;
+  --chart-cat-red: #e66767;
+
+  /* A second, distinct categorical set for the Fuel/Expense trend chart — picked
+     from different palette slots (aqua/violet/magenta/orange) than the Fleet
+     Status chart's green/blue/amber/red so the two charts on the same dashboard
+     never imply a shared meaning through matching hues. Also validated as a set. */
+  --chart-cat2-aqua: #199e70;
+  --chart-cat2-violet: #9085e9;
+  --chart-cat2-magenta: #d55181;
+  --chart-cat2-orange: #d95926;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f2f1ec;
+  --text-h: #0b0b0b;
+  --text: #52514e;
+  --text-muted: #898781;
+  --border: rgba(11, 11, 11, 0.1);
+  --gridline: #e1e0d9;
+  --baseline: #c3c2b7;
+
+  --accent: #2a78d6;
+  --accent-hover: #256abf;
+  --accent-wash: rgba(42, 120, 214, 0.12);
+
+  --role-accent: #3987e5;
+  --role-accent-text: #256abf;
+  --role-accent-ink: #0b0b0b;
+
+  /* --warning is darkened from the palette's raw #fab219 specifically for light
+     mode: that raw value only hits 1.79:1 as text on a light surface (palette.md
+     admits this — "sub-3:1 by design", mitigated there only by pairing with an
+     icon+label). Our badges are text-only, so darkened here to actually pass
+     4.5:1 as badge text, rather than ship know-it's-borderline contrast. */
+  --good: #0ca30c;
+  --good-wash: rgba(12, 163, 12, 0.12);
+  --warning: #8c640e;
+  --warning-wash: rgba(140, 100, 14, 0.14);
+  --critical: #d03b3b;
+  --critical-wash: rgba(208, 59, 59, 0.12);
+  --aqua: #1baf7a;
+  --aqua-wash: rgba(27, 175, 122, 0.12);
+  --violet: #4a3aa7;
+  --violet-wash: rgba(74, 58, 167, 0.12);
+
+  --danger: var(--critical);
+  --danger-bg: var(--critical-wash);
+
+  /* Light-surface categorical set for the Fleet Status chart — validated separately
+     from dark (validate_palette.js --mode light), not an automatic flip of the dark
+     hues, per the dataviz skill's rule that light/dark chart palettes are each their
+     own selected step, not a filter applied to one set. */
+  --chart-cat-green: #008300;
+  --chart-cat-blue: #2a78d6;
+  --chart-cat-amber: #eda100;
+  --chart-cat-red: #e34948;
+
+  --chart-cat2-aqua: #1baf7a;
+  --chart-cat2-violet: #4a3aa7;
+  --chart-cat2-magenta: #e87ba4;
+  --chart-cat2-orange: #eb6834;
+
+  color-scheme: light;
+}
+
+:root {
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
 
   font: 16px/1.5 var(--sans);
-  color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #cbd5e1;
-    --text-h: #f1f5f9;
-    --bg: #0f1115;
-    --surface: #171a21;
-    --border: #2a2e39;
-    --accent: #818cf8;
-    --accent-hover: #a5b4fc;
-    --danger: #f87171;
-    --danger-bg: #2a1414;
-  }
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 * {
@@ -56,80 +157,160 @@ h3 {
 }
 
 a {
-  color: var(--accent);
+  color: var(--role-accent-text);
 }
 
-/* --- App shell / nav --- */
+/* --- App shell: sidebar + content, both floating rounded panels --- */
 
 .app-shell {
   min-height: 100svh;
   display: flex;
-  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  align-items: flex-start;
 }
 
-.navbar {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 12px 20px;
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.navbar-brand {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-h);
-}
-
-.navbar-links {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 14px;
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 16px;
+  height: calc(100svh - 32px);
 }
 
-.navbar-link {
-  padding: 6px 12px;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
-.navbar-link:hover {
-  background: var(--bg);
-}
-
-.navbar-link.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-.navbar-user {
+.sidebar-brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.85rem;
+  padding: 0 8px;
 }
 
+.sidebar-brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-name {
+  font-weight: 700;
+  color: var(--text-h);
+  font-size: 1.05rem;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 9px;
+  border-left: 3px solid transparent;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.sidebar-link:hover {
+  background: var(--surface-2);
+  color: var(--text-h);
+}
+
+/* Left-border + text/icon color, not a solid fill — a full-pill role-accent
+   background would read as a status-badge-style tinted area and blur the two
+   color systems (e.g. Driver green next to an Available-status badge). */
+.sidebar-link.active {
+  background: var(--surface-2);
+  border-left-color: var(--role-accent-text);
+  color: var(--role-accent-text);
+}
+
+.sidebar-user {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sidebar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--role-accent);
+  color: var(--role-accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.sidebar-username {
+  font-size: 0.85rem;
+  color: var(--text-h);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Neutral pill + role-accent text (never a tinted background) — keeps this
+   visually distinct from status badges, which use a tinted background instead. */
 .role-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 1px 8px;
   border-radius: 999px;
-  background: var(--bg);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--text);
+  color: var(--role-accent-text);
+  margin-top: 2px;
 }
 
 .app-content {
   flex: 1;
-  padding: 20px;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  min-height: calc(100svh - 32px);
+}
+
+.app-content-inner {
+  padding: 28px 32px;
   max-width: 1200px;
-  width: 100%;
   margin: 0 auto;
 }
 
@@ -137,32 +318,46 @@ a {
 
 .btn {
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-2);
   color: var(--text-h);
-  border-radius: 6px;
+  border-radius: 10px;
   padding: 8px 16px;
   font-size: 0.9rem;
   cursor: pointer;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dark ink, not white — several role hexes (Driver's green especially) fail
+   WCAG AA contrast with white text at this fill weight. Dark ink passes all four. */
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--role-accent);
+  border-color: var(--role-accent);
+  color: var(--role-accent-ink);
   width: 100%;
 }
 
-.btn-primary:hover {
-  background: var(--accent-hover);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.12);
 }
 
 .btn-ghost {
   background: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.btn-icon {
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .field {
@@ -177,24 +372,24 @@ a {
 .field input,
 .field select {
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface-2);
   color: var(--text-h);
   font-size: 1rem;
 }
 
 .field input:focus,
 .field select:focus {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--role-accent-text);
   outline-offset: 1px;
 }
 
 .form-error {
   background: var(--danger-bg);
-  color: var(--danger);
+  color: var(--critical);
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.85rem;
   margin-bottom: 16px;
 }
@@ -214,7 +409,7 @@ a {
   max-width: 380px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 32px;
   text-align: center;
 }
@@ -243,13 +438,944 @@ a {
   min-height: 100svh;
 }
 
+/* --- CRUD pages: header, filters, table, inline form --- */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-inline {
+  width: auto;
+  white-space: nowrap;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.section-note {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+h2 {
+  margin-top: 32px;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.field-inline {
+  margin-bottom: 0;
+  min-width: 140px;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+.btn-danger {
+  color: var(--critical);
+}
+
+.btn-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- Status badges: soft tint background, full-strength text (standard pill pattern) --- */
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.status-available,
+.status-completed {
+  background: var(--good-wash);
+  color: var(--good);
+}
+
+.status-on_trip,
+.status-dispatched {
+  background: var(--accent-wash);
+  color: var(--accent-hover);
+}
+
+.status-in_shop,
+.status-open {
+  background: var(--warning-wash);
+  color: var(--warning);
+}
+
+.status-retired,
+.status-suspended,
+.status-cancelled {
+  background: var(--critical-wash);
+  color: var(--critical);
+}
+
+.status-off_duty,
+.status-draft,
+.status-closed {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.tag-danger {
+  background: var(--danger-bg);
+  color: var(--critical);
+}
+
+.inline-form {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.form-actions .btn-primary {
+  width: auto;
+}
+
+.field-error {
+  color: var(--critical);
+  font-size: 0.8rem;
+}
+
+/* --- Dashboard: KPI cards, meter, chart --- */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.kpi-tile {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Reset button chrome so the clickable KPI tile (e.g. Pending Requests, reopens
+   the trip-request modal) still looks exactly like a plain kpi-tile. */
+.kpi-tile-clickable {
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+}
+
+.kpi-tile-clickable:hover:not(:disabled) {
+  border-color: var(--role-accent-text);
+}
+
+.kpi-tile-clickable:disabled {
+  cursor: default;
+}
+
+.kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--text-h);
+  line-height: 1;
+}
+
+.kpi-label {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.kpi-updated {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.kpi-tile.meter-tile {
+  grid-column: span 1;
+}
+
+.meter-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(144, 133, 233, 0.18);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--violet);
+  transition: width 0.4s ease;
+}
+
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-panels + .dashboard-panels,
+.dashboard-panels + .kpi-grid {
+  margin-top: 16px;
+}
+
+.chart-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.chart-card h2 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  height: 200px;
+  padding-top: 24px;
+  border-bottom: 1px solid var(--baseline);
+  position: relative;
+}
+
+.bar-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  cursor: default;
+}
+
+.bar-chart-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-h);
+  margin-bottom: 6px;
+}
+
+.bar-chart-bar {
+  width: 100%;
+  max-width: 24px;
+  border-radius: 4px 4px 0 0;
+  transition: filter 0.15s ease;
+}
+
+.bar-chart-col:hover .bar-chart-bar {
+  filter: brightness(1.15);
+}
+
+.bar-chart-labels {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+.bar-chart-labels span {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.bar-chart-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--text-h);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 2;
+}
+
+.bar-chart-col:hover .bar-chart-tooltip,
+.bar-chart-col:focus-visible .bar-chart-tooltip {
+  opacity: 1;
+}
+
+/* --- Line chart (driver trip history) --- */
+
+.line-chart {
+  position: relative;
+  height: 200px;
+}
+
+.line-chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.line-chart-baseline {
+  stroke: var(--baseline);
+  stroke-width: 0.3;
+}
+
+.line-chart-area {
+  fill: var(--accent);
+  fill-opacity: 0.12;
+  stroke: none;
+}
+
+.line-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line-chart-ring {
+  fill: var(--surface-2);
+}
+
+.line-chart-dot {
+  fill: var(--accent);
+}
+
+.line-chart-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.line-chart-endlabel {
+  position: absolute;
+  transform: translate(-50%, -180%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-h);
+  pointer-events: none;
+}
+
+.line-chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -160%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--text-h);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.line-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.line-chart-labels span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* --- Modal (pending trip request popup) --- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.modal-trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.modal-trip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.modal-trip-route {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.9rem;
+}
+
+.modal-trip-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 @media (max-width: 640px) {
-  .navbar {
+  .app-shell {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .navbar-user {
-    justify-content: space-between;
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
   }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-link span {
+    display: none;
+  }
+
+  .app-content-inner {
+    padding: 20px;
+  }
+}
+
+/* --- Theme toggle (fixed top-right, every page) --- */
+
+.theme-toggle {
+  position: fixed;
+  top: 32px;
+  right: 40px;
+  z-index: 20;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.theme-toggle-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease;
+}
+
+.theme-toggle-thumb.light {
+  transform: translateX(18px);
+  color: var(--warning);
+}
+
+/* --- Donut (Safety Score, Fleet Utilization) --- */
+
+.donut-wrap {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  margin: 8px auto 0;
+}
+
+.donut-arc {
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-value {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text-h);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-suffix {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.donut-caption {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  letter-spacing: 0.01em;
+}
+
+/* --- Multi-series trend chart: toggle-to-isolate legend --- */
+
+.legend-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.legend-item-off {
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.legend-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.multi-line-chart {
+  height: 220px;
+}
+
+.multi-line-path {
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line-chart-crosshair {
+  stroke: var(--baseline);
+  stroke-width: 0.25;
+}
+
+.multi-tooltip {
+  transform: translate(-50%, -12px);
+  top: 0;
+  text-align: left;
+}
+
+.multi-tooltip-label {
+  font-weight: 700;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.multi-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* --- Dual metric card (driver: distance + hours) --- */
+
+.dual-metric-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+.dual-metric {
+  text-align: center;
+}
+
+.dual-metric-value {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text-h);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dual-metric-unit {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.dual-metric-label {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* --- Trend chart premium polish (gradient area, delta badge, entrance, latest point) --- */
+
+.narrow-chart {
+  max-width: 640px;
+}
+
+.chart-entrance {
+  animation: chart-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes chart-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.delta-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.delta-good {
+  background: var(--good-wash);
+  color: var(--good);
+}
+
+.delta-bad {
+  background: var(--critical-wash);
+  color: var(--critical);
+}
+
+.trend-point {
+  transition: r 0.15s ease;
+}
+
+.trend-point-latest {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.legend-row-bottom {
+  margin-top: 16px;
+  margin-bottom: 0;
+  justify-content: center;
+}
+
+/* --- Live Trip Routes (schematic route list, not a literal map — no geo data) --- */
+
+.route-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-row {
+  width: 100%;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.route-row:hover {
+  border-color: var(--role-accent-text);
+}
+
+.route-row-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.route-city {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-h);
+  flex-shrink: 0;
+}
+
+.route-track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.route-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.route-dot-end {
+  background: var(--role-accent-text);
+}
+
+.route-line {
+  flex: 1;
+  height: 2px;
+  background: var(--gridline);
+}
+
+.route-pulse {
+  position: absolute;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--role-accent-text);
+  box-shadow: 0 0 6px var(--role-accent-text);
+  animation: route-travel 3.5s ease-in-out infinite;
+}
+
+@keyframes route-travel {
+  0% {
+    left: 4%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 92%;
+    opacity: 0;
+  }
+}
+
+.route-row-meta {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* --- Route/detail modal contents --- */
+
+.detail-section {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.detail-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+/* --- Expense status hero label --- */
+
+.status-hero {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 18px;
+  border-radius: 14px;
+  margin-top: 8px;
+}
+
+.status-hero-good {
+  background: var(--good-wash);
+  color: var(--good);
+}
+
+.status-hero-warning {
+  background: var(--warning-wash);
+  color: var(--warning);
+}
+
+.status-hero-critical {
+  background: var(--critical-wash);
+  color: var(--critical);
 }
