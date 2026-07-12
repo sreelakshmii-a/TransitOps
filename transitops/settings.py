@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'corsheaders',
     'users',
     'vehicles',
     'drivers',
@@ -70,8 +72,16 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'transitops.exceptions.custom_exception_handler',
 }
 
+# Access-token lifetime bumped from simplejwt's 5-minute default so a demo
+# run doesn't get silently logged out mid-presentation.
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -99,25 +109,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'transitops.wsgi.application'
 
+# Frontend (Vite dev server) calls the API cross-origin directly, no dev proxy configured.
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # [contract lock] Postgres for dev AND test settings — SQLite silently no-ops
 # select_for_update(), which would make the dispatch concurrency test a false green.
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['DB_NAME'],
-        'USER': os.environ['DB_USER'],
-        'PASSWORD': os.environ['DB_PASSWORD'],
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5433'),
-        'TEST': {
-            'NAME': os.environ.get('DB_TEST_NAME', 'test_transitops'),
-        },
+# DB_ENGINE defaults to postgres (the shared, safe default). Set DB_ENGINE=sqlite
+# in your own untracked .env only as a personal convenience when you don't have
+# Postgres installed locally — never rely on it for the dispatch concurrency test.
+if os.environ.get('DB_ENGINE', 'postgres') == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5433'),
+            'TEST': {
+                'NAME': os.environ.get('DB_TEST_NAME', 'test_transitops'),
+            },
+        }
+    }
 
 
 # Password validation

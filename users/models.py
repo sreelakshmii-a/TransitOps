@@ -1,7 +1,3 @@
-# PLACEHOLDER STUB — owned by Dev A. Created only so AUTH_USER_MODEL and
-# downstream FKs (Trip.driver -> ... ) aren't blocked by contract-lock
-# ordering. Dev A: flesh this out (fields, validation) in Hour 1/2 and
-# replace this notice.
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 

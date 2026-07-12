@@ -1,7 +1,3 @@
-# PLACEHOLDER STUB — owned by Dev A. Created only so Trip (Dev B) can FK
-# against a real table at contract lock. Dev A: flesh this out (remaining
-# fields, unique registration validation, region/type) in Hour 1 and
-# replace this notice.
 from django.db import models
 
 
@@ -23,3 +19,6 @@ class Vehicle(models.Model):
     region = models.CharField(max_length=64, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.registration_number
