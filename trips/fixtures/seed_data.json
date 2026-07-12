@@ -1,0 +1,165 @@
+[
+  {
+    "model": "vehicles.vehicle",
+    "pk": 1,
+    "fields": {
+      "registration_number": "SEED-AVAIL-1",
+      "model": "Tata Ace",
+      "type": "TRUCK",
+      "capacity": 1000,
+      "odometer": 12000,
+      "acquisition_cost": "850000.00",
+      "status": "AVAILABLE",
+      "region": "North",
+      "created_at": "2026-07-01T00:00:00Z",
+      "updated_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vehicles.vehicle",
+    "pk": 2,
+    "fields": {
+      "registration_number": "SEED-ONTRIP-1",
+      "model": "Ashok Leyland Dost",
+      "type": "TRUCK",
+      "capacity": 1200,
+      "odometer": 34000,
+      "acquisition_cost": "950000.00",
+      "status": "ON_TRIP",
+      "region": "South",
+      "created_at": "2026-07-01T00:00:00Z",
+      "updated_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vehicles.vehicle",
+    "pk": 3,
+    "fields": {
+      "registration_number": "SEED-INSHOP-1",
+      "model": "Mahindra Bolero",
+      "type": "PICKUP",
+      "capacity": 800,
+      "odometer": 58000,
+      "acquisition_cost": "700000.00",
+      "status": "IN_SHOP",
+      "region": "East",
+      "created_at": "2026-07-01T00:00:00Z",
+      "updated_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vehicles.vehicle",
+    "pk": 4,
+    "fields": {
+      "registration_number": "SEED-RETIRED-1",
+      "model": "Eicher Pro",
+      "type": "TRUCK",
+      "capacity": 1500,
+      "odometer": 210000,
+      "acquisition_cost": "600000.00",
+      "status": "RETIRED",
+      "region": "West",
+      "created_at": "2026-07-01T00:00:00Z",
+      "updated_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "drivers.driver",
+    "pk": 1,
+    "fields": {
+      "name": "Seed Driver Available",
+      "license": "DL-SEED-001",
+      "license_expiry": "2027-01-01",
+      "contact": "9000000001",
+      "safety_score": 95,
+      "status": "AVAILABLE",
+      "created_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "drivers.driver",
+    "pk": 2,
+    "fields": {
+      "name": "Seed Driver OnTrip",
+      "license": "DL-SEED-002",
+      "license_expiry": "2027-01-01",
+      "contact": "9000000002",
+      "safety_score": 90,
+      "status": "ON_TRIP",
+      "created_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "drivers.driver",
+    "pk": 3,
+    "fields": {
+      "name": "Seed Driver OffDuty",
+      "license": "DL-SEED-003",
+      "license_expiry": "2027-01-01",
+      "contact": "9000000003",
+      "safety_score": 100,
+      "status": "OFF_DUTY",
+      "created_at": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "trips.trip",
+    "pk": 1,
+    "fields": {
+      "vehicle": 1,
+      "driver": 3,
+      "cargo_weight": 200,
+      "origin": "Warehouse A",
+      "destination": "Depot B",
+      "status": "DRAFT",
+      "dispatched_at": null,
+      "completed_at": null,
+      "created_at": "2026-07-10T00:00:00Z"
+    }
+  },
+  {
+    "model": "trips.trip",
+    "pk": 2,
+    "fields": {
+      "vehicle": 2,
+      "driver": 2,
+      "cargo_weight": 500,
+      "origin": "Depot B",
+      "destination": "Client Site C",
+      "status": "DISPATCHED",
+      "dispatched_at": "2026-07-12T06:00:00Z",
+      "completed_at": null,
+      "created_at": "2026-07-12T05:00:00Z"
+    }
+  },
+  {
+    "model": "trips.trip",
+    "pk": 3,
+    "fields": {
+      "vehicle": 1,
+      "driver": 1,
+      "cargo_weight": 300,
+      "origin": "Client Site C",
+      "destination": "Warehouse A",
+      "status": "COMPLETED",
+      "dispatched_at": "2026-07-11T08:00:00Z",
+      "completed_at": "2026-07-11T14:00:00Z",
+      "created_at": "2026-07-11T07:00:00Z"
+    }
+  },
+  {
+    "model": "trips.trip",
+    "pk": 4,
+    "fields": {
+      "vehicle": 1,
+      "driver": 1,
+      "cargo_weight": 400,
+      "origin": "Depot B",
+      "destination": "Warehouse A",
+      "status": "CANCELLED",
+      "dispatched_at": "2026-07-10T09:00:00Z",
+      "completed_at": null,
+      "created_at": "2026-07-10T08:00:00Z"
+    }
+  }
+]
