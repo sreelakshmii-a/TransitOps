@@ -46,6 +46,10 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     setError(null);
     const { access, refresh } = await authApi.login({ email, password });
+    // Store the token before calling me() -- apiFetch reads the token from
+    // storage, not from the parameter passed here, so me() would otherwise
+    // send an unauthenticated request and get a 401 on the very first login.
+    setSession({ access, refresh });
     const { user: freshUser } = await authApi.me(access);
     setSession({ access, refresh, user: freshUser });
     setUser(freshUser);
