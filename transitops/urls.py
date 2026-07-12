@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/', include('fuel_expenses.urls')),
     path('api/trips/', include('trips.urls')),
     path('api/dispatch/', include('dispatch.urls')),
+    path('api/', include('dashboard.urls')),
 ]
