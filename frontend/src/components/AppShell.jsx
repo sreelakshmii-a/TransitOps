@@ -1,12 +1,14 @@
 import { Outlet } from "react-router-dom";
-import NavBar from "./NavBar";
+import Sidebar from "./Sidebar";
 
 export default function AppShell() {
   return (
     <div className="app-shell">
-      <NavBar />
+      <Sidebar />
       <main className="app-content">
-        <Outlet />
+        <div className="app-content-inner">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
