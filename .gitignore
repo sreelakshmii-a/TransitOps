@@ -5,6 +5,7 @@ db.sqlite3
 .env
 node_modules/
 .claude/scheduled_tasks.lock
+staticfiles/
 
 # personal per-dev working notes — not part of the shared deliverable
 DEV_A_CHECKLIST.md

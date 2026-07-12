@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,12 +27,31 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-sjxte-711$ja*+kr$jk2i5q*ift34d^=fv*k$%-c#l-^gcw=3#'
+# Falls back to the hackathon-demo key for local dev; set SECRET_KEY in the
+# Render env for the deployed instance.
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-sjxte-711$ja*+kr$jk2i5q*ift34d^=fv*k$%-c#l-^gcw=3#',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Defaults to True for local dev; set DEBUG=False in the Render env.
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+# Comma-separated in env, e.g. "your-app.onrender.com,localhost,127.0.0.1"
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        'ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver'
+    ).split(',')
+    if host.strip()
+]
+
+# Render sets its own external hostname at runtime; trust it automatically
+# so a first deploy doesn't 400 before ALLOWED_HOSTS is manually configured.
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # Application definition
@@ -81,6 +101,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -110,7 +131,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'transitops.wsgi.application'
 
 # Frontend (Vite dev server) calls the API cross-origin directly, no dev proxy configured.
+# Local dev: allow everything so nobody has to chase the Vite port. Deployed:
+# explicit allowlist only, e.g. CORS_ALLOWED_ORIGINS=https://your-app.netlify.app
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 
 # Database
@@ -121,7 +154,18 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 # DB_ENGINE defaults to postgres (the shared, safe default). Set DB_ENGINE=sqlite
 # in your own untracked .env only as a personal convenience when you don't have
 # Postgres installed locally — never rely on it for the dispatch concurrency test.
-if os.environ.get('DB_ENGINE', 'postgres') == 'sqlite':
+#
+# Render's managed Postgres injects a single DATABASE_URL instead of the
+# DB_NAME/USER/PASSWORD/HOST/PORT quintet used for local dev — parse that
+# first when present, and leave local dev's env vars untouched otherwise.
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.parse(
+            os.environ['DATABASE_URL'],
+            conn_max_age=600,
+        )
+    }
+elif os.environ.get('DB_ENGINE', 'postgres') == 'sqlite':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -179,6 +223,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
