@@ -18,10 +18,13 @@ class DriverViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         # Spec role table: Fleet Manager gets full access; Safety Officer gets
-        # read-only (drivers/compliance). Everything else (create/update/delete)
-        # stays Fleet-Manager-only.
+        # read-only (drivers/compliance). Driver also gets read-only: confirmed
+        # live that the Trips page's create form needs GET /api/drivers/ for
+        # its driver dropdown (PRD 3.2: Driver "creates trips, assigns vehicles
+        # and drivers"). Everything else (create/update/delete) stays
+        # Fleet-Manager-only.
         if self.action in ("list", "retrieve"):
-            return [IsAuthenticated(), HasRole(Role.FLEET_MANAGER, Role.SAFETY_OFFICER)]
+            return [IsAuthenticated(), HasRole(Role.FLEET_MANAGER, Role.SAFETY_OFFICER, Role.DRIVER)]
         return [IsAuthenticated(), HasRole(Role.FLEET_MANAGER)]
 
     def destroy(self, request, *args, **kwargs):

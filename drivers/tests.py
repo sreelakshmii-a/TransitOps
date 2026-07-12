@@ -63,10 +63,16 @@ class DriverAPITests(APITestCase):
         create_response = self.client.post("/api/drivers/", {"name": "Blocked"})
         self.assertEqual(create_response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_driver_role_forbidden(self):
+    def test_driver_can_read_but_not_write(self):
+        # Driver needs read access to populate the Trips page's driver
+        # dropdown (PRD 3.2: Driver "creates trips, assigns vehicles and
+        # drivers"), but stays blocked from all driver write actions.
         self.auth_as(self.driver_role)
-        response = self.client.get("/api/drivers/")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        list_response = self.client.get("/api/drivers/")
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+
+        create_response = self.client.post("/api/drivers/", {"name": "Blocked"})
+        self.assertEqual(create_response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_status_filter(self):
         Driver.objects.create(name="A", status=DriverStatus.AVAILABLE)

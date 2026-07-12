@@ -18,10 +18,13 @@ class VehicleViewSet(viewsets.ModelViewSet):
     filterset_fields = ["type", "status", "region"]
 
     def get_permissions(self):
-        # Per the spec's role table, vehicles are Fleet Manager's full-access
-        # domain. Open question for other devs: does Driver need read access
-        # here to populate a trip-creation dropdown? Not in the role table as
-        # written — flagged in DEV_A_CHECKLIST.md rather than guessed here.
+        # Vehicles are Fleet Manager's full-access domain, but Driver needs
+        # read access too: confirmed live that the Trips page's create form
+        # fetches GET /api/vehicles/ to populate its vehicle dropdown, and
+        # PRD 3.2 has Driver "creates trips, assigns vehicles and drivers" --
+        # without this, Driver-role users get a 403 and can't create a trip.
+        if self.action in ("list", "retrieve"):
+            return [IsAuthenticated(), HasRole(Role.FLEET_MANAGER, Role.DRIVER)]
         return [IsAuthenticated(), HasRole(Role.FLEET_MANAGER)]
 
     def destroy(self, request, *args, **kwargs):

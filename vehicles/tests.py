@@ -28,10 +28,16 @@ class VehicleAPITests(APITestCase):
         response = self.client.get("/api/vehicles/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_non_fleet_manager_forbidden(self):
+    def test_driver_can_read_but_not_write(self):
+        # Driver needs read access to populate the Trips page's vehicle
+        # dropdown (PRD 3.2: Driver "creates trips, assigns vehicles and
+        # drivers"), but stays blocked from all vehicle write actions.
         self.auth_as(self.driver)
-        response = self.client.get("/api/vehicles/")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        list_response = self.client.get("/api/vehicles/")
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+
+        create_response = self.client.post("/api/vehicles/", {"registration_number": "X"})
+        self.assertEqual(create_response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_safety_officer_forbidden(self):
         self.auth_as(self.safety_officer)
