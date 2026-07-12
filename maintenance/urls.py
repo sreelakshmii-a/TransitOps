@@ -1,5 +1,8 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    # ModelViewSet + close action — Dev A, Hour 4
-]
+from .views import MaintenanceLogViewSet
+
+router = DefaultRouter()
+router.register(r"", MaintenanceLogViewSet, basename="maintenancelog")
+
+urlpatterns = router.urls
