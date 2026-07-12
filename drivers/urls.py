@@ -1,5 +1,8 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    # ModelViewSet routes — Dev A, Hour 2
-]
+from .views import DriverViewSet
+
+router = DefaultRouter()
+router.register(r"", DriverViewSet, basename="driver")
+
+urlpatterns = router.urls
