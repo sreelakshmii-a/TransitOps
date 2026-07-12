@@ -1,7 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from users.models import Role
+from users.permissions import HasRole
 
 from .models import Vehicle, VehicleStatus
 from .serializers import VehicleSerializer
@@ -12,6 +16,13 @@ class VehicleViewSet(viewsets.ModelViewSet):
     serializer_class = VehicleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["type", "status", "region"]
+
+    def get_permissions(self):
+        # Per the spec's role table, vehicles are Fleet Manager's full-access
+        # domain. Open question for other devs: does Driver need read access
+        # here to populate a trip-creation dropdown? Not in the role table as
+        # written — flagged in DEV_A_CHECKLIST.md rather than guessed here.
+        return [IsAuthenticated(), HasRole(Role.FLEET_MANAGER)]
 
     def destroy(self, request, *args, **kwargs):
         vehicle = self.get_object()
