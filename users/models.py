@@ -10,4 +10,7 @@ class Role(models.TextChoices):
 
 
 class User(AbstractUser):
+    # PRD 3.1 mandates email+password login (not AbstractUser's default
+    # username-based auth) — email must be unique for that lookup to be sound.
+    email = models.EmailField(unique=True)
     role = models.CharField(max_length=32, choices=Role.choices, blank=True)
