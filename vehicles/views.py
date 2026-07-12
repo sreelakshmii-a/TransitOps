@@ -1,3 +1,4 @@
+from django.db.models import ProtectedError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -31,7 +32,16 @@ class VehicleViewSet(viewsets.ModelViewSet):
                 {"reason": "vehicle_on_trip", "code": "cannot_delete_vehicle_on_trip"},
                 status=status.HTTP_409_CONFLICT,
             )
-        return super().destroy(request, *args, **kwargs)
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            # Trip.vehicle is on_delete=PROTECT — any trip referencing this
+            # vehicle (including old DRAFT/COMPLETED ones) would otherwise
+            # crash this as an unhandled 500.
+            return Response(
+                {"reason": "vehicle_has_trips", "code": "cannot_delete_vehicle_with_trips"},
+                status=status.HTTP_409_CONFLICT,
+            )
 
     @action(detail=True, methods=["patch"])
     def retire(self, request, pk=None):

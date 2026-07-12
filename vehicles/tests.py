@@ -92,3 +92,19 @@ class VehicleAPITests(APITestCase):
         )
         response = self.client.delete(f"/api/vehicles/{vehicle.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_with_linked_trip_returns_409_not_500(self):
+        # Regression test: Trip.vehicle is on_delete=PROTECT, so deleting a
+        # vehicle referenced by any trip (even a harmless DRAFT) used to crash
+        # with an unhandled ProtectedError (500) instead of a clean response.
+        from drivers.models import Driver
+        from trips.models import Trip
+
+        vehicle = Vehicle.objects.create(registration_number="D1", capacity=100)
+        driver = Driver.objects.create(name="X", license_expiry="2030-01-01")
+        Trip.objects.create(vehicle=vehicle, driver=driver, cargo_weight=1, origin="A", destination="B")
+
+        self.auth_as(self.fleet_manager)
+        response = self.client.delete(f"/api/vehicles/{vehicle.id}/")
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(response.data["reason"], "vehicle_has_trips")

@@ -37,6 +37,16 @@ class MaintenanceLogViewSet(viewsets.ModelViewSet):
                     {"reason": "vehicle_on_trip", "code": "cannot_open_maintenance_mid_trip"},
                     status=status.HTTP_409_CONFLICT,
                 )
+            if MaintenanceLog.objects.filter(
+                vehicle_id=vehicle_id, status=MaintenanceStatus.OPEN
+            ).exists():
+                # Without this, two concurrent OPEN logs could exist on one
+                # vehicle, and closing either one would incorrectly release
+                # it to AVAILABLE while the other log is still open.
+                return Response(
+                    {"reason": "maintenance_already_open", "code": "vehicle_already_in_maintenance"},
+                    status=status.HTTP_409_CONFLICT,
+                )
             serializer.save()
             vehicle.status = VehicleStatus.IN_SHOP
             vehicle.save(update_fields=["status"])

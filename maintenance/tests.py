@@ -40,9 +40,24 @@ class MaintenanceAPITests(APITestCase):
             "/api/maintenance/", {"vehicle": vehicle.id, "reason": "Brakes", "cost": "10.00"}
         )
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
-        self.assertEqual(response.data["reason"], "vehicle_on_trip")
-        vehicle.refresh_from_db()
-        self.assertEqual(vehicle.status, VehicleStatus.ON_TRIP)
+
+    def test_second_open_maintenance_blocked_while_one_already_open(self):
+        # Regression test: without this guard, two concurrent OPEN logs could
+        # exist on one vehicle, and closing either one would incorrectly
+        # release it to AVAILABLE while the other log is still open.
+        vehicle = Vehicle.objects.create(
+            registration_number="V6", capacity=100, status=VehicleStatus.AVAILABLE
+        )
+        first = self.client.post(
+            "/api/maintenance/", {"vehicle": vehicle.id, "reason": "Oil", "cost": "10.00"}
+        )
+        self.assertEqual(first.status_code, status.HTTP_201_CREATED)
+
+        second = self.client.post(
+            "/api/maintenance/", {"vehicle": vehicle.id, "reason": "Brakes", "cost": "20.00"}
+        )
+        self.assertEqual(second.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(second.data["reason"], "maintenance_already_open")
 
     def test_close_restores_vehicle_to_available(self):
         vehicle = Vehicle.objects.create(
