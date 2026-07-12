@@ -57,3 +57,27 @@ class AuthAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["user"]["email"], "alex@example.com")
         self.assertEqual(response.data["user"]["role"], "DRIVER")
+
+
+class SeedDataLoginTests(APITestCase):
+    """The demo accounts documented in IMPLEMENTATION.md must be loginable
+    after `loaddata seed_data` — this is exactly what the deployed build runs."""
+
+    fixtures = ["seed_data"]
+
+    DEMO_ACCOUNTS = [
+        ("fleet@transitops.test", "FLEET_MANAGER"),
+        ("driver@transitops.test", "DRIVER"),
+        ("safety@transitops.test", "SAFETY_OFFICER"),
+        ("finance@transitops.test", "FINANCIAL_ANALYST"),
+    ]
+
+    def test_seeded_demo_users_can_login(self):
+        for email, role in self.DEMO_ACCOUNTS:
+            with self.subTest(email=email):
+                response = self.client.post(
+                    "/api/auth/login/", {"email": email, "password": "password123"}
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertIn("access", response.data)
+                self.assertEqual(User.objects.get(email=email).role, role)

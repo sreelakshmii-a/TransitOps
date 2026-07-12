@@ -1,5 +1,61 @@
 [
   {
+    "model": "users.user",
+    "pk": 101,
+    "fields": {
+      "username": "fleet_manager",
+      "email": "fleet@transitops.test",
+      "password": "pbkdf2_sha256$1000000$XaJ4SkmucH6Ck4l6kCEw8t$EkL58XDqlIPqFVZDOT4azjRzWK0wLJXPw64ZlezSY3g=",
+      "role": "FLEET_MANAGER",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 102,
+    "fields": {
+      "username": "driver_alex",
+      "email": "driver@transitops.test",
+      "password": "pbkdf2_sha256$1000000$XaJ4SkmucH6Ck4l6kCEw8t$EkL58XDqlIPqFVZDOT4azjRzWK0wLJXPw64ZlezSY3g=",
+      "role": "DRIVER",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 103,
+    "fields": {
+      "username": "safety_officer",
+      "email": "safety@transitops.test",
+      "password": "pbkdf2_sha256$1000000$XaJ4SkmucH6Ck4l6kCEw8t$EkL58XDqlIPqFVZDOT4azjRzWK0wLJXPw64ZlezSY3g=",
+      "role": "SAFETY_OFFICER",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 104,
+    "fields": {
+      "username": "finance_analyst",
+      "email": "finance@transitops.test",
+      "password": "pbkdf2_sha256$1000000$XaJ4SkmucH6Ck4l6kCEw8t$EkL58XDqlIPqFVZDOT4azjRzWK0wLJXPw64ZlezSY3g=",
+      "role": "FINANCIAL_ANALYST",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2026-07-01T00:00:00Z"
+    }
+  },
+  {
     "model": "vehicles.vehicle",
     "pk": 1,
     "fields": {
