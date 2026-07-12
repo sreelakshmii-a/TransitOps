@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Expense, FuelLog
+
+admin.site.register(FuelLog)
+admin.site.register(Expense)
