@@ -4,8 +4,12 @@ __pycache__/
 db.sqlite3
 .env
 node_modules/
-.claude/scheduled_tasks.lock
 staticfiles/
+dist/
+
+# personal/local Claude Code settings — not part of the shared deliverable
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
 
 # personal per-dev working notes — not part of the shared deliverable
 DEV_A_CHECKLIST.md
